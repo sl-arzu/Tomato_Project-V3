@@ -137,6 +137,10 @@ dmypy.json
 # Project specific
 results/             # All auto-generated outputs (models, training results, plots)
 !results/README.md   # But keep the README documentation
+# Private datasets: ignore all files in data/ but keep README and folder structure
+data/**
+!data/**/
+!data/README.md
 *.npz.bak
 *.pt                 # PyTorch model files
 *.npy                # NumPy files

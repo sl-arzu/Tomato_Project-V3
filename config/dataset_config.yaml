@@ -1,0 +1,41 @@
+# Dataset configuration for Tomato Plant Stress Detection
+# Specifies dataset locations, preprocessing parameters, and train/test splits
+
+datasets:
+  water_stress:
+    name: "Water Stress"
+    data_path: "./data/water_stress/Water_Stress.npz"
+    description: "Bioimpedance measurements under water stress conditions"
+    
+  iron_stress:
+    name: "Iron Stress"
+    data_path: "./data/iron_stress/Iron_Stress.npz"
+    description: "Bioimpedance measurements under iron stress conditions"
+
+# Data preprocessing parameters
+preprocessing:
+  # Frequency selection (bioimpedance frequencies)
+  feature_selection:
+    water_stress:
+      selected_freq_indices: [0, 1, 2]  # 100-120 Hz
+      description: "Optimal frequencies for water stress detection"
+    iron_stress:
+      selected_freq_indices: [3, 4, 5]  # Higher frequencies for iron stress
+      description: "Optimal frequencies for iron stress detection"
+  
+  # Normalization/standardization
+  normalization:
+    method: "standardization"  # or "min_max"
+    fit_on_train: true
+
+# Train/test split configuration
+train_test_split:
+  test_size: 0.2
+  random_state: 42
+  stratify: true
+
+# Data loading parameters
+loading:
+  batch_size: 32
+  num_workers: 2
+  pin_memory: true

@@ -1,0 +1,56 @@
+
+📋 INFORMAZIONI DATASET
+
+Water Stress:
+  • Campioni: 50
+  • Feature: 6
+  • Classi: 3
+  • Distribuzione: {0: 20, 1: 20, 2: 10}
+
+Iron Stress:
+  • Campioni: 50
+  • Feature: 6
+  • Classi: 3
+  • Distribuzione: {0: 23, 1: 11, 2: 16}
+
+⚙️  CONFIGURAZIONE ENCODING
+
+  • nb_steps: 100
+  • dt: 1.0
+  • gain_lif: 0.12
+  • gain_rate: 10.0
+  • tau_syn: 12.0
+  • tau_mem: 15.0
+  • tau_ref: 3.0
+  • input_shift: 3.8
+  • noise_std: 2
+  • population_size: 1
+
+📊 STATISTICHE ENCODER
+
+
+                                  WATER STRESS                                  
+────────────────────────────────────────────────────────────────────────────────
+Encoder         Output Shape              Spikes               Density        
+────────────────────────────────────────────────────────────────────────────────
+lif             (50, 100, 6)              5852                 19.51         %
+rate            (50, 100, 6)              8996                 29.99         %
+rate_hz         (50, 100, 6)              749                  2.50          %
+
+                                  IRON STRESS                                   
+────────────────────────────────────────────────────────────────────────────────
+Encoder         Output Shape              Spikes               Density        
+────────────────────────────────────────────────────────────────────────────────
+lif             (50, 100, 6)              5861                 19.54         %
+rate            (50, 100, 6)              8925                 29.75         %
+rate_hz         (50, 100, 6)              754                  2.51          %
+
+✅ RISULTATI TEST
+
+  • LIF encoder: funzionante ✓
+  • Rate encoder (Poisson): funzionante ✓
+  • Rate encoder (Hz): funzionante ✓
+  • Data loading: OK ✓
+  • Feature selection: OK ✓
+  • Normalization: OK ✓
+  • Output shapes: verificate ✓

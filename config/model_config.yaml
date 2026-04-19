@@ -1,0 +1,54 @@
+# Model configuration for Spiking Neural Network (SNN)
+# Specifies architecture, training parameters, and temporal encoding settings
+
+# Temporal encoding parameters
+temporal_encoding:
+  method: "lif"  # Leaky Integrate-and-Fire neurons
+  duration_ms: 100  # Total simulation duration in milliseconds
+  time_step_ms: 1  # Time step in milliseconds
+  threshold: 0.5  # Spike threshold
+  membrane_potential_decay: 0.95  # Leak factor
+  
+  # Input normalization for encoding
+  input_normalization:
+    method: "standardization"
+    min_value: -3.0
+    max_value: 3.0
+
+# SNN Architecture (if used)
+network:
+  layers:
+    - type: "input"
+      units: 100  # Input spike neurons (from temporal encoding)
+      
+    - type: "spiking_hidden"
+      units: 128
+      activation: "lif"
+      dropout: 0.5
+      
+    - type: "output"
+      units: 2  # Binary classification: stressed vs non-stressed
+      activation: "softmax"
+
+# Training parameters
+training:
+  epochs: 100
+  learning_rate: 0.001
+  optimizer: "adam"
+  loss_function: "cross_entropy"
+  
+  # Regularization
+  l1_regularization: 0.0001
+  l2_regularization: 0.0001
+  
+  # Early stopping
+  early_stopping:
+    enabled: true
+    patience: 10
+    min_delta: 0.001
+
+# Inference parameters
+inference:
+  threshold: 0.5
+  use_ensemble: false
+  ensemble_models: 5

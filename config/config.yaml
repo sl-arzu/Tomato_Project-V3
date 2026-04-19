@@ -1,0 +1,31 @@
+# Centralized Configuration for Tomato Plant Stress Detection Project
+# Author: Shanti Leonardo Arzu
+# Date: March 2026
+
+# Project metadata
+project:
+  name: "Tomato Plant Stress Detection with SNN"
+  version: "2.0"
+  description: "Temporal encoding of bioimpedance signals for plant stress detection using Spiking Neural Networks"
+  author: "Shanti Leonardo Arzu"
+
+# Dataset configuration reference
+dataset:
+  config_file: "dataset_config.yaml"
+  data_dir: "./data"
+
+# Model configuration reference
+model:
+  config_file: "model_config.yaml"
+
+# Output and results configuration
+results:
+  dir: "./results"
+  save_models: true
+  save_plots: true
+  save_logs: true
+
+# Logging configuration
+logging:
+  level: "INFO"
+  file: "./results/logs/project.log"

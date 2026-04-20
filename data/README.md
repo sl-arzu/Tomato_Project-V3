@@ -1,48 +1,42 @@
-# Dataset Documentation
+# Dataset - Bioimpedance Measurements
 
-## Overview
-This directory contains bioimpedance datasets for tomato plant stress detection. The data represents measurements under different stress conditions (water stress and iron stress).
+Misurazioni di bioimpedenza per piante di pomodoro sotto diversi stress.
 
-## Dataset Structure
+---
 
-### water_stress/
-- **File**: `Water_Stress.npz`
-- **Description**: Bioimpedance measurements recorded from tomato plants under water stress conditions
-- **Format**: NumPy compressed archive (.npz)
-- **Content**: Time-series bioimpedance measurements at multiple frequencies
+## 📊 File Dati
 
-### iron_stress/
-- **File**: `Iron_Stress.npz`
-- **Description**: Bioimpedance measurements recorded from tomato plants under iron deficiency stress conditions
-- **Format**: NumPy compressed archive (.npz)
-- **Content**: Time-series bioimpedance measurements at multiple frequencies
+### water_stress/Water_Stress.npz
+Bioimpedenza da piante sotto stress idrico.
+- Campioni: 1000
+- Features: 400 frequenze
+- Label: 0=Control, 1=Early stress, 2=Late stress
 
-## Data Format
-Each .npz file contains:
-- **Impedance measurements**: Multi-dimensional array of bioimpedance values
-- **Frequency information**: Operating frequencies for impedance measurements
-- **Metadata**: Sampling information, measurement conditions, plant identifiers
+### iron_stress/Iron_Stress.npz
+Bioimpedenza da piante sotto stress da ferro.
+- Campioni: 1000
+- Features: 400 frequenze
+- Label: 0=Control, 1=Early stress, 2=Late stress
 
-## Usage
-Data loading and preprocessing can be done using:
-- `src/data_processing_management.py` - Main data manager class
-- `src/data_processing_preprocessing.py` - Feature selection and normalization
-- `src/model/temporal_encoding.py` - Temporal encoding for SNN input
+---
 
-## Loading Data
+## 📥 Uso
+
 ```python
-from src.data_processing_management import PlantDataManager
+from src.data_processing_manager import PlantDataManager
 
-# Load water stress data
 manager = PlantDataManager(stress_type="water")
-train_loader, test_loader = manager.load_and_split()
-
-# Or load iron stress data
-manager = PlantDataManager(stress_type="iron")
-train_loader, test_loader = manager.load_and_split()
+ds_train, ds_test, metadata = manager.prepare_dataset_standard_split(
+    "data/water_stress/Water_Stress.npz"
+)
 ```
 
-## Notes
-- All measurements are in impedance units (Ω)
-- Temporal encoding converts continuous signals to spike trains for SNN processing
-- Feature selection uses optimal frequency indices based on Elastic Net analysis
+Il manager automaticamente:
+1. Seleziona 6 features ottimali
+2. Normalizza con statistica train
+3. Applica temporal encoding
+4. Split train/test (70/30)
+
+---
+
+🚀 Vedi [../docs/QUICK_START.md](../docs/QUICK_START.md) per primi passi

@@ -1,138 +1,69 @@
-# 📊 Results Folder Organization (FLAT - Max 1 Level Deep)
+# 📊 Results (Output Training)
 
-This folder contains all outputs from training, analysis, and visualization scripts.
-Structure **simplified** to max 1 level deep - all related outputs grouped together by execution.
+Tutti gli output di training sono in questa cartella.
 
 ---
 
-## 🎯 Where to Find What?
+## 📁 Cartelle
 
-### I just ran `python main.py` — where are my results?
+| Cartella | Contenuto | Uso |
+|----------|-----------|-----|
+| **models/** | Modelli .pt allenati | Load per inference |
+| **training/** | Tutte le figure (training, confusion, raster, pesi) | **PRINCIPALE** - verificare qualità training |
+| **spike_analysis/** | Analisi spike e statistiche | Diagnostica spike |
+| **dataset/** | Visualizzazioni HTML esplorative | Esplorare dati |
+| **logs/** | Debug output | Troubleshooting |
+
+---
+
+## 🎯 Subito Dopo `python main.py`
 
 ```
-✅ Saved model:           results/models/water_lif_ep10_hid12.pt
-✅ Training curves:       results/training/water_lif_eprop_ep10_hid12_training.pdf
-✅ Confusion matrix:      results/training/water_lif_eprop_ep10_hid12_confusion.pdf
-✅ Weight evolution:      results/training/water_lif_eprop_ep10_hid12_weights_*.pdf
-✅ Spike raster (KEY!):   results/training/water_lif_eprop_ep10_hid12_raster.pdf
+results/models/water_lif_ep100_hid300.pt        ← Modello salvato
+results/training/water_lif_eprop_ep100_hid300_training.pdf    ← Loss + accuracy
+results/training/water_lif_eprop_ep100_hid300_confusion.pdf   ← Confusion matrix
+results/training/water_lif_eprop_ep100_hid300_raster.pdf      ← Spike raster (KEY!)
 ```
 
-**Start here:** Open `results/training/` to see all outputs from one training run together.
-
 ---
 
-## 📁 Folder Breakdown (FLAT Structure)
+## 🔍 Tre Cose da Controllare
 
-| Folder | Contains | When Generated | Used For |
-|--------|----------|---------------|----|  
-| **models/** | Trained `.pt` files | After each training run | Model inference/deployment |
-| **training/** | All training outputs (FLAT) | After each training run | **PRIMARY**: Metrics, confusion, weights, rasters all together |
-| **spike_analysis/** | Spike statistics & raster plots | After each training run | **Diagnostic tool** - spike propagation analysis |
-| **dataset/** | Interactive HTML visualizations | Run dataset scripts | Dataset exploration & visualization |
-| **encoding/** | Encoder comparisons & test reports | Run encoding tests | Validate/compare encoders |
-| **logs/** | Training logs & debug output | Long-running tasks | Troubleshooting |
-
----
-
-## 🔍 Key Diagnostic Tools
-
-### 1. **Raster Plot** (Most Important!)
-**File**: `training/*_raster.pdf` (now in training/ folder with other outputs)
-
-Shows spike timing across network layers:
-- **Encoding Input layer**: Should see ~20-25% spike density
-- **Hidden layer**: Should see ~10-15% spike density  
-- **Output layer**: Should see ~1-5% spike density
-
-**What to look for**:
-- ✅ **Good**: Varied spike patterns, no periodicity, cascade through layers
-- ❌ **Bad**: Regular periodic spikes (encoder problem), all zeros (threshold too high), all ones (threshold too low)
-
-### 2. **Training Curves**
-**File**: `training/*_training.pdf` (all in training/ folder)
-
-- Loss should decrease (not oscillate)
-- Accuracy should increase or stabilize
-- If not improving: lower learning rate or increase epochs
-
-### 3. **Confusion Matrix**
-**File**: `training/*_confusion.pdf` (all in training/ folder)
-
-- Diagonal = correct predictions (good!)
-- Off-diagonal = misclassifications (which classes confuse the network?)
-
-### 4. **Weight Evolution**
-**File**: `training/*_weights*.pdf` (all in training/ folder)
-
-- Mean weights should stabilize (not explode/vanish)
-- Individual weights should show learning dynamics
-
----
-
-## 📋 Standard Naming Pattern
-
-Output files follow this naming convention:
-
-```
-{stress_type}_{encoding_type}_{algorithm}_ep{epochs}_hid{hidden_neurons}_{plot_type}.pdf
-```
-
-**Example**: `water_lif_eprop_ep10_hid12_training.pdf`
-- `water` = Stress type (water or iron)
-- `lif` = Encoder (lif, rate, or rate_hz)
-- `eprop` = Algorithm (eprop or bptt)
-- `ep10` = 10 training epochs
-- `hid12` = 12 hidden neurons
-- `training` = Plot type (training, confusion, weights, raster)
-
----
-
-## 🚀 Quick Start with Results
-
-### 1. Check if training worked
+### 1. Raster Plot
 ```bash
-open results/training/water_lif_eprop_ep10_hid12_training.pdf
+open results/training/water_lif_eprop_ep100_hid300_raster.pdf
 ```
-→ Loss decreasing? Accuracy increasing? ✅
 
-### 2. Diagnose spike propagation
+Verificare spike density:
+- Input layer: 20-30% ✅
+- Hidden layer: 10-15% ✅
+- Output layer: >1% ✅
+
+### 2. Training Curves
 ```bash
-open results/training/water_lif_eprop_ep10_hid12_raster.pdf
+open results/training/water_lif_eprop_ep100_hid300_training.pdf
 ```
-→ Spikes flowing through all layers? ✅
 
-### 3. Evaluate per-class accuracy
+- Loss deve **diminuire** ✅
+- Accuracy deve **aumentare** ✅
+
+### 3. Confusion Matrix
 ```bash
-open results/training/water_lif_eprop_ep10_hid12_confusion.pdf
+open results/training/water_lif_eprop_ep100_hid300_confusion.pdf
 ```
-→ Diagonal bright? Classes well-separated? ✅
 
-### 4. Load model for inference
-```python
-import torch
-model = torch.load("results/models/water_lif_ep10_hid12.pt")
-```
+- Diagonale luminosa = predizioni corrette ✅
 
 ---
 
-## 🧹 Cleanup
+## 🎯 Nomenclatura File
 
-Old/temporary results can be safely deleted:
-```bash
-rm -rf results/logs/*           # Debug output
-rm -rf results/spike_analysis/statistics/*  # Intermediate analysis
+```
+{stress}_{encoding}_{algo}_ep{epochs}_hid{neurons}_{tipo}.pdf
 ```
 
-Keep everything else for reproducibility!
+Esempio: `water_lif_eprop_ep100_hid300_training.pdf`
 
 ---
 
-## 🔗 Related Documentation
-
-- **Understanding parameters**: [`docs/CONFIGURATION.md`](../docs/CONFIGURATION.md)
-- **Project structure**: [`docs/PROJECT_STRUCTURE.md`](../docs/PROJECT_STRUCTURE.md)
-- **Full API reference**: [`docs/API.md`](../docs/API.md)
-
----
-
-**Last Updated**: April 19, 2026
+📖 Vedi [../docs/CONFIGURATION.md](../docs/CONFIGURATION.md) per fix se non funziona

@@ -1,57 +1,52 @@
-# 📁 PROJECT STRUCTURE
-
-## Directory Tree
+# 📁 Struttura del Progetto
 
 ```
-TomatoProject_Rigore/
+Tomato_Project-V3/
+├── main.py                    ← Punto di ingresso
+├── environment.yml
+├── requirements.txt
 │
-├── 📄 main.py                      Entry point - training orchestrator
-├── 📄 environment.yml              Conda environment
-├── 📄 requirements.txt             Python dependencies
+├── src/                       ← Codice principale
+│   ├── data_processing_manager.py              Load + split + encode
+│   ├── data_processing_plant_feature_selector.py   Selezione features
+│   ├── temp_enco_dispatcher.py                 Router encoder (LIF/Rate)
+│   ├── temp_enco_lif_population.py            LIF encoder
+│   ├── temp_enco_rate.py                      Rate encoder
+│   ├── snn_layer_model.py                     Layer SNN
+│   ├── learning_trainer.py                    Training loop
+│   ├── learning_evaluator.py                  Predictions + metrics
+│   ├── learning_bptt.py                       BPTT algorithm
+│   ├── learning_eprop.py                      E-prop algorithm
+│   ├── snn_gradient_surrogate.py              Spike + surrogate
+│   └── plot_visualizations_new.py             Grafici
 │
-├── 📁 src/                         ← CORE CODE (15 files)
-│   ├── data_processing_manager.py           Load & split datasets
-│   ├── data_processing_feature_selection.py Select optimal frequencies
-│   ├── temp_enco_dispatcher.py              Encoder selector (LIF/Rate)
-│   ├── temp_enco_lif_population.py          LIF encoder (main)
-│   ├── temp_enco_rate.py                    Rate encoder
-│   ├── snn_layer_model.py                   Network layers (RecurrentLayer, FeedforwardLayer)
-│   ├── learning_trainer.py                  Training loop (SNNTrainer)
-│   ├── learning_evaluator.py                Prediction & metrics (ModelEvaluator)
-│   ├── learning_bptt.py                     BPTT algorithm
-│   ├── learning_eprop.py                    E-prop algorithm
-│   ├── snn_gradient_surrogate.py            Surrogate gradient
-│   ├── plot_visualizations_new.py           Plotting functions
-│   └── [other utilities]
+├── data/                      ← Dataset
+│   ├── water_stress/Water_Stress.npz
+│   └── iron_stress/Iron_Stress.npz
 │
-├── 📁 tests/                       Unit tests
+├── results/                   ← Output (auto-generato)
+│   ├── models/                Modelli .pt
+│   ├── training/              Output training
+│   ├── spike_analysis/        Analisi spike
+│   ├── dataset/               Esplorazione
+│   ├── encoding/              Test encoder
+│   └── logs/                  Debug
+│
+├── tests/                     ← Test unitari
 │   ├── test_encoding_with_real_data.py
 │   └── test_temp_enco_models.py
 │
-├── 📁 config/                      Configuration files
+├── config/                    ← File YAML
 │   ├── config.yaml
 │   ├── dataset_config.yaml
 │   └── model_config.yaml
 │
-├── 📁 data/                        Datasets
-│   ├── water_stress/Water_Stress.npz
-│   └── iron_stress/Iron_Stress.npz
-│
-├── 📁 results/                     Auto-generated outputs ← OUTPUT ORGANIZATION (FLAT: max 1 level)
-│   ├── models/                     Saved SNN models (.pt files)
-│   ├── training/                   All training results (metrics, confusion, weights, rasters)
-│   ├── spike_analysis/             Neural activity analysis (raster plots & statistics)
-│   ├── dataset/                    Dataset exploration & analysis
-│   ├── encoding/                   Encoder validation & comparisons
-│   └── logs/                       Training logs & debug output
-│
-└── 📁 docs/                        ← YOU ARE HERE
-    ├── README.md                   Documentation index
-    ├── QUICK_START.md              5-minute guide
-    ├── PROJECT_STRUCTURE.md        (this file)
-    ├── CONFIGURATION.md            Parameters explained
-    ├── API.md                       Class reference
-    └── [model_docs/, dataset_docs/]
+└── docs/                      ← Documentazione
+    ├── README.md
+    ├── QUICK_START.md
+    ├── CONFIGURATION.md
+    ├── API.md
+    └── PROJECT_STRUCTURE.md
 ```
 
 ---
@@ -85,124 +80,61 @@ LIFEncoder: Leaky integrate-and-fire dynamics
 Spike sequences (50 timesteps × 6 features)
 ```
 
-### SNN Architecture
-| File | Purpose |
-|------|---------|
-| `snn_layer_model.py` | `RecurrentLayer`, `FeedforwardLayer` definitions |
-| `snn_gradient_surrogate.py` | Spike function + surrogate gradient |
-
-### Learning & Evaluation
-| File | Purpose |
-|------|---------|
-| `learning_eprop.py` | E-prop algorithm (eligibility propagation) |
-| `learning_bptt.py` | BPTT algorithm (backprop through time) |
-| `learning_trainer.py` | **SNNTrainer** - main training loop |
-| `learning_evaluator.py` | **ModelEvaluator** - predictions & metrics |
-
-### Visualization
-| File | Purpose |
-|------|---------|
-| `plot_visualizations_new.py` | Raster plots, confusion matrix, weight evolution |
-
 ---
 
-## Data Format
+## 🔄 Flusso Dati
 
-### Input (NPZ files)
 ```
-Water_Stress.npz or Iron_Stress.npz
-  ├── X: (n_samples, 400)           Raw bioimpedance measurements
-  ├── y: (n_samples,)               Labels: 0=Control, 1=Early, 2=Late
-  └── plant_ids: (n_samples,)       Plant identifiers
-```
-
-### After Feature Selection
-```
-X_selected: (n_samples, 6)
-  └── 3 frequencies × 2 (Real + Imaginary)
-```
-
-### After Encoding
-```
-X_encoded: (n_samples, NB_STEPS, 6)
-  └── Binary spike sequences (0 or 1)
+.npz (400 features, 1000 campioni)
+  ↓
+Selezione Features (6 features z-score normalized)
+  ↓
+Temporal Encoding LIF/Rate (150 timestep)
+  ↓
+Spike Sequences (1000, 150, 6)
+  ↓
+Train/Test Split (70/30)
+  ↓
+SNN Training (E-prop o BPTT)
 ```
 
 ---
 
-## Parameter Files
+## 📊 Output Generati
 
-### main.py (Lines 30-85)
-Central configuration location with organized sections:
-- **PARAMETRI ESPERIMENTO** (dataset, split)
-- **PARAMETRI DI TEMPORAL ENCODING** (encoder params)
-- **IPERPARAMETRI ENCODER LIF** (encoder tuning)
-- **IPERPARAMETRI RETE RICORRENTE** (network tuning)
-- **IPERPARAMETRI TRAINING** (learning params)
-
-All parameters are in one place for easy modification.
-
----
-
-## Output Generation
-
-### During Training
-- `water_lif_eprop_ep10_hid12_training.pdf` - Loss & accuracy curves
-- `water_lif_eprop_ep10_hid12_confusion.pdf` - Confusion matrix
-- `water_lif_eprop_ep10_hid12_weights_mean.pdf` - Weight evolution
-
-### After Training
-- `water_lif_eprop_ep10_hid12_raster.pdf` - Spike raster plots (key diagnostic!)
-- `water_lif_ep10_hid12.pt` - Saved model weights
-
----
-
-## Results Folder Structure 📊 (FLAT - Max 1 Level Deep)
-
-The `results/` folder is **simplified** to max 1 level deep, grouping related outputs from the same execution together:
+Dopo `python main.py`:
 
 ### `results/models/`
-**Saved SNN models** (PyTorch .pt files)
 ```
-water_lif_ep10_hid12.pt          ← Model trained on water_stress, 10 epochs
-iron_rate_ep5_hid8.pt            ← Model on iron_stress with Rate encoder
-```
-- One model file per unique configuration
-- Load with: `torch.load("results/models/model_name.pt")`
-
-### `results/training/` (FLAT - no subdirectories)
-**All training outputs in one level**: metrics, confusion matrices, weight evolution, raster plots
-```
-water_lif_eprop_ep10_hid12_training.pdf      ← Loss & accuracy per epoch
-water_lif_eprop_ep10_hid12_confusion.pdf     ← Confusion matrix (rows=true, cols=predicted)
-water_lif_eprop_ep10_hid12_weights_mean.pdf  ← Average weight evolution
-water_lif_eprop_ep10_hid12_weights_indiv.pdf ← Individual weight samples (10-15 per layer)
-water_lif_eprop_ep10_hid12_raster.pdf        ← Spike raster (Encoding → Hidden → Output)
+water_lif_ep100_hid300.pt    ← Modello allenato
 ```
 
-**Why flat?** All files from one training run have the same prefix (`water_lif_eprop_ep10_hid12_*`), making them easy to:
-- Find together
-- Organize by experiment
-- Delete as a batch (same config)
-
-### `results/spike_analysis/` (FLAT - no subdirectories)
-**Neural activity analysis** - spike statistics and raster plots
+### `results/training/` (tutti insieme)
 ```
-water_lif_eprop_ep10_hid12_raster.pdf        ← KEY DIAGNOSTIC: spike timing per layer
-water_lif_eprop_ep10_hid12_spike_stats.txt   ← Spike rates, firing patterns, ISI distributions
+water_lif_eprop_ep100_hid300_training.pdf     ← Loss + accuracy
+water_lif_eprop_ep100_hid300_confusion.pdf    ← Confusion matrix
+water_lif_eprop_ep100_hid300_raster.pdf       ← Spike raster (KEY!)
+water_lif_eprop_ep100_hid300_weights_mean.pdf ← Evoluzione pesi
 ```
 
-**Key diagnostic in raster plot:**
-- No spikes = problem with thresholds/gains
-- Too many spikes = signals too strong
-- Periodic patterns = refractory period misconfigured
-- Chaotic patterns = normal, expected
+---
 
-### `results/dataset/` (FLAT - no subdirectories)
-**Dataset exploration & analysis** - explorers & visualizations
+## 🎯 Nominazione Output
+
 ```
-pca3d_water_stress_normalizzato_zscore.html       ← Interactive 3D PCA plot
-pca3d_water_stress_non_normalizzato.html          ← PCA without normalization
+{stress}_{encoding}_{algo}_ep{epochs}_hid{neurons}_{tipo}.pdf
+```
+
+**Esempio**: `water_lif_eprop_ep100_hid300_raster.pdf`
+- `water` = Tipo stress
+- `lif` = Encoder
+- `eprop` = Algoritmo
+- `ep100` = 100 epoche
+- `hid300` = 300 neuroni hidden
+
+---
+
+**Aggiornato**: 20 Aprile 2026
 water_stress_pca_temporal.html                    ← PCA colored by day
 water_stress_spectrum_explorer.html               ← Impedance spectrum visualization
 ...

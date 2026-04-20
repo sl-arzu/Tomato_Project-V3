@@ -35,8 +35,8 @@ SEED = 42
 # ╔════════════════════════════════════════════════════════════════════════════╗
 # ║ PARAMETRI DI TEMPORAL ENCODING                                             ║
 # ╚════════════════════════════════════════════════════════════════════════════╝
-ENCODING_TYPE = "lif"
-NB_STEPS = 50
+ENCODING_TYPE = "rate"
+NB_STEPS = 150
 DT = 1.0
 GAIN_RATE = 10.0
 GAIN_LIF = 0.35
@@ -55,7 +55,7 @@ NOISE_STD = 1.0
 # ╔════════════════════════════════════════════════════════════════════════════╗
 # ║ IPERPARAMETRI RETE RICORRENTE (SNN - HIDDEN LAYER)                        ║
 # ╚════════════════════════════════════════════════════════════════════════════╝
-HIDDEN_NEURONS = 12
+HIDDEN_NEURONS = 300
 TAU_MEM_REC = 35.0
 TAU_REF = 2.5
 THRESHOLD = 0.80
@@ -69,8 +69,8 @@ W_OUT_SCALE = 0.90
 # ╔════════════════════════════════════════════════════════════════════════════╗
 # ║ IPERPARAMETRI TRAINING                                                     ║
 # ╚════════════════════════════════════════════════════════════════════════════╝
-ALGORITHM = "eprop"
-EPOCHS = 10
+ALGORITHM = "eprop" # "eprop" o "bptt"
+EPOCHS = 100
 BATCH_SIZE = 24
 LEARNING_RATE = 0.003
 GAMMA = 0.3
@@ -120,7 +120,12 @@ def main():
         np.random.seed(SEED)
         torch.manual_seed(SEED)
 
-    device = torch.device('mps' if torch.backends.mps.is_available() else 'cuda' if torch.cuda.is_available() else 'cpu')
+    
+    #per mac os con gpu m1/m2
+    # device = torch.device('mps' if torch.backends.mps.is_available() else 'cuda' if torch.cuda.is_available() else 'cpu')
+    # per server con cuda
+    device = torch.device('cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu')
+    
     print(f"✓ Device: {device}")
     print(f"   DEBUG: ENCODING_TYPE = '{ENCODING_TYPE}' \n")
 
@@ -161,7 +166,7 @@ def main():
     train_loader = DataLoader(ds_train, batch_size=BATCH_SIZE, shuffle=True, num_workers=0)
     test_loader = DataLoader(ds_test, batch_size=BATCH_SIZE, shuffle=False, num_workers=0)
 
-    nb_inputs = metadata.get("nb_inputs", 6)
+    nb_inputs = metadata.get("nb_inputs", 6) * POPULATION_SIZE
     nb_outputs = metadata.get("nb_outputs", 3)
     max_time_ms = int(NB_STEPS * DT)
     print(f"✓ Dati caricati: {len(ds_train)} train | {len(ds_test)} test\n")
@@ -209,7 +214,11 @@ def main():
         tau_mem_ms=TAU_MEM, 
         max_time_ms=max_time_ms, 
         lr=LEARNING_RATE, 
-        algorithm=ALGORITHM
+        algorithm=ALGORITHM,
+        # ─── PARAMETRI SCHEDULER ───
+        scheduler_patience=5,      # Riduci dopo 5 epoche senza miglioramento
+        scheduler_factor=0.5,      # Riduci LR del 50%
+        scheduler_min_lr=1e-7      # Non scendere sotto 1e-7
     )
     
     history, weight_history = trainer.fit(

@@ -67,10 +67,18 @@ class LIFEncoder(nn.Module):
         self.population_size = population_size
 
         # Selezione device automatica (PRIMA della RNG)
-        if torch.backends.mps.is_available():
-            self.device = torch.device("mps")
-        elif torch.cuda.is_available():
+        #if torch.backends.mps.is_available():
+        #    self.device = torch.device("mps")
+        #elif torch.cuda.is_available():
+        #    self.device = torch.device("cuda")
+        #else:
+        #    self.device = torch.device("cpu")
+
+        #Per Server con cuda
+        if torch.cuda.is_available():
             self.device = torch.device("cuda")
+        elif torch.backends.mps.is_available():
+            self.device = torch.device("mps")
         else:
             self.device = torch.device("cpu")
 

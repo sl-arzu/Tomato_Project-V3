@@ -13,6 +13,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from typing import Dict, Tuple, Any, List, Optional
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from src.learning_eprop import run_snn as run_snn_eprop
 from src.learning_bptt import run_snn as run_snn_bptt
@@ -29,7 +30,10 @@ class SNNTrainer:
         tau_mem_ms: float,
         max_time_ms: float,
         lr: float = 0.0015,
-        algorithm: str = "eprop"
+        algorithm: str = "eprop",
+        scheduler_patience: int = 5,      # Epoche prima di ridurre LR
+        scheduler_factor: float = 0.5,    # Fattore di riduzione
+        scheduler_min_lr: float = 1e-6   # LR minimo
     ):
         self.layers = layers
         self.device = device
@@ -46,7 +50,17 @@ class SNNTrainer:
         )
         
         self.optimizer = torch.optim.Adamax(self.layers, lr=lr, betas=(0.9, 0.995))
-        
+        # Scheduler per riduzione adattativa del learning rate
+        self.scheduler = ReduceLROnPlateau(
+            self.optimizer,
+            mode='min',              # Monitora loss (minimo è meglio)
+            factor=scheduler_factor, # Es: 0.5 = riduce LR del 50%
+            patience=scheduler_patience,  # Epoche senza miglioramento
+            threshold=1e-4,          # Cambiamento minimo considerato miglioramento
+            cooldown=1,              # Epoche da aspettare dopo una riduzione
+            min_lr=scheduler_min_lr,  # LR non scende sotto questo valore
+        )
+    
         self.history = {
             "loss": [],
             "train_acc": [],
@@ -141,5 +155,16 @@ class SNNTrainer:
             pbar.set_description(
                 f"Epoch {epoch + 1}/{epochs} | Loss: {mean_loss:.4f} | Train: {train_acc * 100:.2f}% | Test: {test_acc * 100:.2f}%"
             )
+            # ─── AGGIORNA SCHEDULER ───
+            # Monitora il loss per decidere se ridurre il LR
+            self.scheduler.step(mean_loss)
+            
+            # Opzionale: mostra il LR corrente
+            current_lr = self.optimizer.param_groups[0]['lr']
+            
+            pbar.set_description(
+                f"Epoch {epoch + 1}/{epochs} | Loss: {mean_loss:.4f} | LR: {current_lr:.2e} | Train: {train_acc * 100:.2f}% | Test: {test_acc * 100:.2f}%"
+            )
+
             
         return self.history, self.weight_history

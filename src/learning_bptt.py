@@ -77,7 +77,9 @@ def run_snn(
 
     # ── BPTT BACKWARD (PyTorch Autograd) ──
     if trainable and yt is not None:
-        y_out_rate = n_spike * tau_mem_ms / max_time_ms
+        # Use spike_rec_readout directly to maintain computation graph for gradients
+        spike_count = torch.sum(spk_rec_readout, dim=1)
+        y_out_rate = spike_count * tau_mem_ms / max_time_ms
 
         # Binary cross-entropy loss (spike_rate vs target)
         y_out_rate_clamped = torch.clamp(y_out_rate, min=1e-7, max=1.0)

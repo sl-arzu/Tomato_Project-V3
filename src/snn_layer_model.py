@@ -13,6 +13,7 @@ Data: Aprile 2026
 import numpy as np
 import torch
 from typing import Tuple, Dict, Optional
+from src.snn_gradient_surrogate import spike_function
 
 
 def compute_decay_factors(dt: float, tau_mem: float, tau_mem_rec: float, 
@@ -92,10 +93,8 @@ class FeedforwardLayer:
         spk_rec = []
 
         for t in range(nb_steps):
-            # Controllo soglia (threshold = 1.0 implicito)
-            mthr = mem - 1.0
-            out = torch.zeros_like(mthr)
-            out[mthr > 0] = 1
+            # Controllo soglia con spike function (differenziabile per BPTT)
+            out = spike_function(mem, threshold=1.0)
             n_spike[out == 1] += 1
             
             # rst è il segnale di reset (sganciato dal gradiente)
@@ -185,9 +184,8 @@ class RecurrentLayer:
             # L'input totale include la componente feedforward + la ricorrente (moltiplicazione matriciale out @ W_rec.T)
             h1 = input_activity[:, t] + torch.einsum("ab,bc->ac", (out, rec_weights.t()))
             
-            mthr = mem - 1.0
-            out = torch.zeros_like(mthr)
-            out[mthr > 0] = 1
+            # Controllo soglia con spike function (differenziabile per BPTT)
+            out = spike_function(mem, threshold=1.0)
             rst = out.detach()
 
             if ref_per_counter is not None:

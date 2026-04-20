@@ -27,7 +27,7 @@ from src import plot_visualizations_new as plots
 # ║ PARAMETRI ESPERIMENTO / DATI                                               ║
 # ╚════════════════════════════════════════════════════════════════════════════╝
 STRESS_TYPE = "water"
-LEAVE_PLANT = "P3"
+LEAVE_PLANT = "P1" 
 RANDOM_SPLIT = True
 SEED = 42
 
@@ -36,7 +36,7 @@ SEED = 42
 # ║ PARAMETRI DI TEMPORAL ENCODING                                             ║
 # ╚════════════════════════════════════════════════════════════════════════════╝
 ENCODING_TYPE = "rate"
-NB_STEPS = 150
+NB_STEPS = 100
 DT = 1.0
 GAIN_RATE = 10.0
 GAIN_LIF = 0.35
@@ -55,7 +55,7 @@ NOISE_STD = 1.0
 # ╔════════════════════════════════════════════════════════════════════════════╗
 # ║ IPERPARAMETRI RETE RICORRENTE (SNN - HIDDEN LAYER)                        ║
 # ╚════════════════════════════════════════════════════════════════════════════╝
-HIDDEN_NEURONS = 300
+HIDDEN_NEURONS = 120
 TAU_MEM_REC = 35.0
 TAU_REF = 2.5
 THRESHOLD = 0.80
@@ -69,7 +69,7 @@ W_OUT_SCALE = 0.90
 # ╔════════════════════════════════════════════════════════════════════════════╗
 # ║ IPERPARAMETRI TRAINING                                                     ║
 # ╚════════════════════════════════════════════════════════════════════════════╝
-ALGORITHM = "eprop" # "eprop" o "bptt"
+ALGORITHM = "bptt" # "eprop" o "bptt"
 EPOCHS = 100
 BATCH_SIZE = 24
 LEARNING_RATE = 0.003
